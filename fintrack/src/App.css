@@ -1,183 +1,24 @@
-/*#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-/*.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.title {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.card {
-  background-color: #f0f0f0;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.form label {
-  font-weight: bold;
-}
-
-.form input,
-.form select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.form button {
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.form button:hover {
-  background-color: #0056b3;
-}
-
-.balance {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.positive {
-  color: green;
-}
-
-.negative {
-  color: red;
-}
-
-.transaction-list {
-  list-style-type: none;
-  padding: 0;
-}
-
-.transaction-item {
-  border-bottom: 1px solid #ccc;
-  padding: 10px 0;
-}
-
-.transaction-details {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.summary-controls {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-.summary-controls button {
-  padding: 5px 10px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.summary-controls button.active {
-  background-color: #007bff;
-  color: white;
-}
-
-.summary-content {
-  margin-top: 10px;
-}
-*/
-/* App.css */
-
-/* Container */
-/* Main layout */
-/* App.css */
-
-body {
-  font-family: "Inter", sans-serif;
-  background-color: #f5f5f5;
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* Container */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
 }
 
+/* Typography */
 .title {
   font-size: 2.5rem;
   font-weight: 700;
@@ -186,13 +27,7 @@ body {
   text-align: center;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
+/* Card styles */
 .card {
   background-color: #ffffff;
   border-radius: 8px;
@@ -208,19 +43,7 @@ body {
   margin-bottom: 1rem;
 }
 
-.balance {
-  font-size: 2.5rem;
-  font-weight: 700;
-}
-
-.positive {
-  color: #00a650;
-}
-
-.negative {
-  color: #dc3545;
-}
-
+/* Form styles */
 .form {
   display: flex;
   flex-direction: column;
@@ -256,7 +79,7 @@ body {
 
 .form button {
   padding: 0.75rem;
-  background-color: #000;
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
@@ -267,9 +90,32 @@ body {
 }
 
 .form button:hover {
-  background-color: #333;
+  background-color: #0056b3;
 }
 
+/* Grid Layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Balance display */
+.balance {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.positive {
+  color: #00a650;
+}
+
+.negative {
+  color: #dc3545;
+}
+
+/* Transaction list */
 .transaction-list {
   list-style-type: none;
   padding: 0;
@@ -300,36 +146,7 @@ body {
   color: #666;
 }
 
-.edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.button-group button,
-.transaction-details button {
-  padding: 0.5rem 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  background-color: white;
-  cursor: pointer;
-  font-size: 0.875rem;
-  transition: all 0.3s ease;
-}
-
-.button-group button:first-child,
-.transaction-details button:hover {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
+/* Summary controls */
 .summary-controls {
   display: flex;
   justify-content: center;
@@ -353,12 +170,7 @@ body {
   border-color: #007bff;
 }
 
-.summary-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1 rem;
-}
-
+/* Responsive design */
 @media (max-width: 800px) {
   .container {
     padding: 1rem;
