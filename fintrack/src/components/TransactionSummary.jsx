@@ -27,25 +27,41 @@ function TransactionSummary({ transactions }) {
   }, [transactions, summaryPeriod])
 
   return (
-    
     <div className="card">
       <h2>Transaction Summary</h2>
-      <div className="summary-controls">
-        <button onClick={() => setSummaryPeriod("weekly")} className={summaryPeriod === "weekly" ? "active" : ""}>
+      <div className="period-toggle">
+        <button
+          onClick={() => setSummaryPeriod("weekly")}
+          className={`toggle-btn ${summaryPeriod === "weekly" ? "active" : ""}`}
+        >
           Weekly
         </button>
-        <button onClick={() => setSummaryPeriod("monthly")} className={summaryPeriod === "monthly" ? "active" : ""}>
+        <button
+          onClick={() => setSummaryPeriod("monthly")}
+          className={`toggle-btn ${summaryPeriod === "monthly" ? "active" : ""}`}
+        >
           Monthly
         </button>
       </div>
       <div className="summary-content">
-        <p>Income: ${summary.income.toFixed(2)}</p>
-        <p>Expenses: ${summary.expenses.toFixed(2)}</p>
-        <p>Net: ${summary.net.toFixed(2)}</p>
-        
+        <div className="summary-item">
+          <span className="summary-label">Income:</span>
+          <span className="summary-value positive">${summary.income.toFixed(2)}</span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">Expenses:</span>
+          <span className="summary-value negative">${summary.expenses.toFixed(2)}</span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">Net:</span>
+          <span className={`summary-value ${summary.net >= 0 ? "positive" : "negative"}`}>
+            ${summary.net.toFixed(2)}
+          </span>
+        </div>
       </div>
     </div>
   )
 }
 
 export default TransactionSummary
+

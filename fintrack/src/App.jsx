@@ -1,9 +1,9 @@
 "use client"
 
+import "./App.css"
 import { useState } from "react"
 import FinanceTracker from "./components/FinanceTracker"
-import Login from "./components/login"
-import "./App.css"
+import Login from "./components/Login"
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import TransactionHistory from "./TransactionHistory"
 import TransactionSummary from "./TransactionSummary"
 import SpendingPieChart from "./SpendingPieChart"
+import IncomePieChart from "./IncomePieChart"
 
 function FinanceTracker() {
   const [transactions, setTransactions] = useState([])
@@ -131,6 +132,7 @@ function FinanceTracker() {
       <div className="grid">
         <TransactionSummary transactions={transactions} />
         <SpendingPieChart transactions={transactions} />
+        <IncomePieChart transactions={transactions} />
       </div>
     </div>
   )
