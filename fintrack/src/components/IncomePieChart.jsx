@@ -4,12 +4,16 @@ import { useEffect, useState } from "react"
 import { Pie } from "react-chartjs-2"
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
 
+// Register required chart elements for Chart.js to work
 ChartJS.register(ArcElement, Tooltip, Legend)
 
 function IncomePieChart({ transactions }) {
+  // State to store the chart data
   const [chartData, setChartData] = useState(null)
 
+  // useEffect runs when transactions change to update the pie chart data
   useEffect(() => {
+    // Filter only income transactions and group them by category
     const incomeByCategory = transactions
       .filter((t) => t.type === "income")
       .reduce((acc, t) => {
@@ -17,9 +21,11 @@ function IncomePieChart({ transactions }) {
         return acc
       }, {})
 
+    // Extract labels (categories) and data (amounts)
     const labels = Object.keys(incomeByCategory)
     const data = Object.values(incomeByCategory)
 
+    // Set up the data for the Pie chart
     setChartData({
       labels,
       datasets: [
@@ -43,8 +49,9 @@ function IncomePieChart({ transactions }) {
         },
       ],
     })
-  }, [transactions])
+  }, [transactions]) // Runs whenever transactions change
 
+  // If chart data is not ready, return nothing
   if (!chartData) {
     return null
   }
@@ -58,4 +65,3 @@ function IncomePieChart({ transactions }) {
 }
 
 export default IncomePieChart
-
