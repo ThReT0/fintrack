@@ -1,94 +1,168 @@
+// src/components/FinanceTracker.jsx
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react" // Added useRef for tracking initial render
 import TransactionHistory from "./TransactionHistory"
 import TransactionSummary from "./TransactionSummary"
 import SpendingPieChart from "./SpendingPieChart"
 import IncomePieChart from "./IncomePieChart"
+import { auth } from "../firebase"
+import { db } from "../firebase" // Import Firestore
+import { signOut, onAuthStateChanged } from "firebase/auth"
+import {
+  collection,
+  doc,
+  setDoc,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore"
 
 function FinanceTracker() {
-  // State to store the list of transactions
   const [transactions, setTransactions] = useState([])
-
-  // State to store the user's balance
   const [balance, setBalance] = useState(0)
-
-  // State to store the details of a new transaction being added
   const [newTransaction, setNewTransaction] = useState({
-    type: "expense", // Can be "income" or "expense"
+    type: "expense",
     amount: 0,
     category: "",
-    date: new Date().toISOString().split("T")[0], // Sets default to today's date
+    date: new Date().toISOString().split("T")[0],
     description: "",
   })
+  const [user, setUser] = useState(null) // Track the current user
+  const isInitialRender = useRef(true) // Track initial render to handle Strict Mode
 
-  // useEffect to load stored transactions from local storage when the component first mounts
+  // Load transactions for the current user when they log in
   useEffect(() => {
-    const storedTransactions = localStorage.getItem("transactions")
-    if (storedTransactions) {
-      setTransactions(JSON.parse(storedTransactions))
-    }
-  }, [])
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser)
+        let initialTransactions = [] // Temporary array to store initial data
+        const userTransactionsRef = collection(db, "transactions")
+        const q = query(userTransactionsRef, where("userId", "==", currentUser.uid))
 
-  // useEffect to update local storage and recalculate balance whenever transactions change
+        // Real-time listener for transactions
+        const unsubscribeTransactions = onSnapshot(q, (snapshot) => {
+          const userTransactions = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+
+          // Prevent duplicate updates on initial render (e.g., due to Strict Mode)
+          if (isInitialRender.current) {
+            initialTransactions = userTransactions
+            setTransactions(userTransactions)
+            isInitialRender.current = false // Mark as not initial after first update
+          } else {
+            // Only update if there are new or different transactions
+            const newTransactions = userTransactions.filter(
+              (t) => !initialTransactions.some((it) => it.id === t.id)
+            )
+            if (newTransactions.length > 0) {
+              setTransactions(userTransactions)
+              initialTransactions = userTransactions // Update initial data
+            }
+          }
+        }, (error) => {
+          console.error("Error fetching transactions:", error)
+        })
+
+        return () => unsubscribeTransactions() // Cleanup on unmount or user change
+      } else {
+        setUser(null)
+        setTransactions([])
+        isInitialRender.current = true // Reset for next user
+      }
+    })
+
+    return () => unsubscribeAuth() // Cleanup auth listener
+  }, [auth, db])
+
+  // Calculate balance whenever transactions change
   useEffect(() => {
-    localStorage.setItem("transactions", JSON.stringify(transactions))
-    calculateBalance()
-  }, [transactions])
-
-  // Function to calculate the total balance based on transaction history
-  const calculateBalance = () => {
     const newBalance = transactions.reduce((acc, transaction) => {
       return transaction.type === "income" ? acc + transaction.amount : acc - transaction.amount
     }, 0)
     setBalance(newBalance)
-  }
+  }, [transactions])
 
-  // Handles user input changes in the form fields
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setNewTransaction((prev) => ({ ...prev, [name]: name === "amount" ? Number.parseFloat(value) : value }))
   }
 
-  // Handles selection changes for transaction type (income or expense)
   const handleSelectChange = (e) => {
     setNewTransaction((prev) => ({ ...prev, type: e.target.value }))
   }
 
-  // Handles form submission to add a new transaction
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!user) return // Ensure user is logged in
+
     const transaction = {
       ...newTransaction,
-      id: Date.now().toString(), // Creates a unique ID using the current timestamp
+      id: Date.now().toString(),
+      userId: user.uid, // Associate transaction with the user
     }
-    setTransactions((prev) => [...prev, transaction]) // Adds the new transaction to the list
-    setNewTransaction({
-      type: "expense",
-      amount: 0,
-      category: "",
-      date: new Date().toISOString().split("T")[0], // Reset the date to today's date
-      description: "",
-    }) // Resets the form after submission
+
+    const transactionExists = transactions.some(
+      (t) => t.id === transaction.id || (t.amount === transaction.amount && t.category === transaction.category && t.description === transaction.description && t.date === transaction.date)
+    )
+    if (transactionExists) return
+
+    try {
+      // Save to Firestore under the user's transactions collection
+      const userDocRef = doc(db, "transactions", transaction.id)
+      await setDoc(userDocRef, transaction)
+
+      setTransactions((prev) => [...prev, transaction])
+      setNewTransaction({
+        type: "expense",
+        amount: 0,
+        category: "",
+        date: new Date().toISOString().split("T")[0],
+        description: "",
+      })
+    } catch (error) {
+      console.error("Error saving transaction:", error)
+    }
   }
 
-  // Function to update an existing transaction in the list
-  const handleUpdateTransaction = (updatedTransaction) => {
-    setTransactions((prev) => prev.map((t) => (t.id === updatedTransaction.id ? updatedTransaction : t)))
+  const handleUpdateTransaction = async (updatedTransaction) => {
+    if (!user) return // Ensure user is logged in
+
+    try {
+      const transactionDocRef = doc(db, "transactions", updatedTransaction.id)
+      await setDoc(transactionDocRef, updatedTransaction, { merge: true })
+
+      setTransactions((prev) => prev.map((t) => (t.id === updatedTransaction.id ? updatedTransaction : t)))
+    } catch (error) {
+      console.error("Error updating transaction:", error)
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+    } catch (err) {
+      console.error("Logout error:", err)
+    }
   }
 
   return (
     <div className="container">
       <h1 className="title">CoinTrack Dashboard</h1>
+      <button onClick={handleLogout} className="btn btn-secondary">
+        Log Out
+      </button>
 
-      {/* Display the user's current balance */}
       <div className="grid">
         <div className="card">
           <h2>Current Balance</h2>
-          <p className={`balance ${balance >= 0 ? "positive" : "negative"}`}>${balance.toFixed(2)}</p>
+          <p className={`balance ${balance >= 0 ? "positive" : "negative"}`}>
+            ${balance.toFixed(2)}
+          </p>
         </div>
 
-        {/* Form to add a new transaction */}
         <div className="card">
           <h2>Add New Transaction</h2>
           <form onSubmit={handleSubmit} className="form">
@@ -145,10 +219,7 @@ function FinanceTracker() {
         </div>
       </div>
 
-      {/* Display the transaction history with editing functionality */}
       <TransactionHistory transactions={transactions} onUpdateTransaction={handleUpdateTransaction} />
-
-      {/* Display transaction summary and pie charts */}
       <div className="grid">
         <TransactionSummary transactions={transactions} />
         <SpendingPieChart transactions={transactions} />
